@@ -1,0 +1,10 @@
+public class Main {
+    private static final int NUM_PRATOS = 5;
+    private static final Semaphore semaphore = new Semaphore(1);
+
+    public static void main(String[] args) {
+        for (int i = 1; i <= NUM_PRATOS; i++) {
+            new Thread(new Prato(i)).start();
+        }
+    }
+}
