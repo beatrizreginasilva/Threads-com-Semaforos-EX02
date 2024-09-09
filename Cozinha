@@ -1,0 +1,60 @@
+import java.util.concurrent.Semaphore;
+
+public class Cozinha {
+    private static final int NUM_PRATOS = 5;
+    private static final Semaphore semaphore = new Semaphore(1);
+
+    public static void main(String[] args) {
+        for (int i = 1; i <= NUM_PRATOS; i++) {
+            new Thread(new Prato(i)).start();
+        }
+    }
+
+    static class Prato implements Runnable {
+        private final int id;
+
+        Prato(int id) {
+            this.id = id;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (id % 2 == 1) {
+                    // Sopa de Cebola
+                    cozinharPrato("Sopa de Cebola", 0.5, 0.8);
+                } else {
+                    // Lasanha a Bolonhesa
+                    cozinharPrato("Lasanha a Bolonhesa", 0.6, 1.2);
+                }
+                entregarPrato();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        private void cozinharPrato(String nomePrato, double minTempo, double maxTempo) throws InterruptedException {
+            double tempoCozimento = minTempo + (maxTempo - minTempo) * Math.random();
+            int totalSteps = (int) (tempoCozimento / 0.1);
+            System.out.println("Iniciando " + nomePrato + " (ID: " + id + ")");
+
+            for (int i = 1; i <= totalSteps; i++) {
+                Thread.sleep(100); // 0.1 segundos
+                System.out.printf("%s (ID: %d) - %.1f%% pronto%n", nomePrato, id, (i * 100.0 / totalSteps));
+            }
+
+            System.out.println(nomePrato + " (ID: " + id + ") está pronto!");
+        }
+
+        private void entregarPrato() throws InterruptedException {
+            semaphore.acquire();
+            try {
+                System.out.println("Entregando prato (ID: " + id + ")");
+                Thread.sleep(500); // Simula a entrega de 0.5 segundos
+                System.out.println("Prato (ID: " + id + ") entregue!");
+            } finally {
+                semaphore.release();
+            }
+        }
+    }
+}
